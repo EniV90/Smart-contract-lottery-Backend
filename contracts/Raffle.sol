@@ -35,6 +35,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     }
     /*state variable*/
 
+    
     VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
     bytes32 private immutable i_gasLane;
     uint64 private immutable i_subscriptionId;
@@ -100,7 +101,15 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
     function checkUpkeep(
         bytes memory /*checkData*/
-    ) public override returns (bool upkeepNeeded, bytes memory /*performData */) {
+    )
+        public        
+        view
+        override
+        returns (
+            bool upkeepNeeded,
+            bytes memory /*performData */
+        )
+    {
         bool isOpen = (RaffleState.OPEN == s_raffleState);
         bool timePassed = ((block.timestamp - s_lastTimeStamp) > i_interval);
         bool hasPlayers = s_players.length > 0;
@@ -108,7 +117,9 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         upkeepNeeded = (isOpen && timePassed && hasPlayers && hasBalance);
     }
 
-    function performUpkeep(bytes calldata /*performData */) external override {
+    function performUpkeep(
+        bytes calldata /*performData */
+    ) external override {
         (bool upKeepNeeded, ) = checkUpkeep("");
         if (!upKeepNeeded) {
             revert Raffle__upKeepNotNeeded(
@@ -130,7 +141,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     }
 
     function fulfillRandomWords(
-        uint256 /*requestId*/,
+        uint256, /*requestId*/
         uint256[] memory randomWords
     ) internal override {
         uint256 indexOfWinner = randomWords[0] % s_players.length;
